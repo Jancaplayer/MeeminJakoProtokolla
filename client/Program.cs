@@ -7,23 +7,88 @@ namespace Asiakas;
 
 public class Asiakas
 {
+
+    /// <summary>
+    /// cli ympäristö protokollan testaamiselle.
+    /// </summary>
     public static void Main()
     {
-        //käynnistä
-        //Socket soketti = Yhdistä();
-        //Kirjaudu();
-        //jos kirjautunut
-        Listaa();
-        Kerää();
-        Lataa();
-        Lähetä();
-        Poista();
-        Vaihda();
-        //
-        //soketti.Close();
-        string x, y, z;
-        (x, y, z) = haeConfig();
-        Console.WriteLine($"{x} {y} {z}");
+        //alustus
+        bool kirjautunut = false;
+        Socket soketti = null;
+        string server, port, userid;
+        (server, port, userid) = haeConfig();
+        Console.WriteLine($"{server} {port} {userid}");
+
+
+        string command = string.Empty;
+        while (command.ToLower() != "quit")
+        {
+            if (soketti == null) { Console.WriteLine("\"yhdistä\" avataksesi yhteyden palvelimeen"); }
+            if (!kirjautunut) { Console.WriteLine("\"kirjaudu\" kirjautuaksesi palvelimeen"); }
+            Console.WriteLine("-------------------------------\n");
+            Console.Write(": ");
+            command = Console.ReadLine();
+            command = command == null ? string.Empty : command;
+            switch (command.ToLower())
+            {
+                case "yhdistä":
+                    soketti = Yhdistä(server, int.Parse(port));
+                    break;
+                case "kirjaudu":
+                    string kirjautuminen = Kirjaudu(userid);
+                    kirjautunut = kirjautuminen == "success" ? true : false;
+                    if (!kirjautunut)
+                    {
+                        Console.WriteLine(kirjautuminen);
+                        throw new Exception();
+                    }
+                    break;
+                default:
+                    if (kirjautunut) { komentoKytkin(command); }
+                    else { Console.WriteLine("komennot eivät käytössä ennen kuin on kirjauduttu"); }
+                    break;
+            }
+            
+        }
+
+
+        if (soketti != null) { soketti.Close(); }
+    }
+
+    public static void komentoKytkin(string command)
+    {
+        switch (command.ToLower())
+            {
+                case "listaa":
+                    break;
+                case "kerää":
+                    break;
+                case "lataa":
+                    break;
+                case "lähetä":
+                    break;
+                case "poista":
+                    break;
+                case "vaihda":
+                    break;
+                case "quit":
+                    Console.WriteLine("Quitting..");
+                    break;
+                case "help":
+                    Console.WriteLine(
+                    "Listaa: listaa hakutulokset avainsanojen mukaan\n" +
+                    "Kerää : kerää data thumbnaileista, hyödytön komentorivillä\n" +
+                    "Lataa : lataa indeksin mukaisen tiedoston (placeholder: tämänhetkiseen kansioon)\n"+
+                    "Lähetä: lähettää uuden kuvatiedoston sen avainsanojen ja kategorian kanssa palvelimelle\n"+
+                    "Poista: poistaa indeksin mukaisen kuvan palvelimelta\n"+
+                    "Vaihda: vaihtaa indeksin avainsanat uusiin\n\n"+
+                    "Help&Quit");
+                    break;
+                default:
+                    Console.WriteLine("Komentoa ei ymmärretty");
+                    break;
+            }
     }
 
     /// <summary>
@@ -34,7 +99,9 @@ public class Asiakas
     /// <returns>toimivan soketin</returns>
     public static Socket Yhdistä(string ip, int portti)
     {
-        return null;
+        Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        s.Connect(ip, portti);
+        return s;
     }
 
     /// <summary>
