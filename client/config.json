@@ -1,7 +1,7 @@
 [
     {
         "server": "localhost",
-        "port": "25001",
+        "port": "25000",
         "userid": "user123"
     }
 ]
