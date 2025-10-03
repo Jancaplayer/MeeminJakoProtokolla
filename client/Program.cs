@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 
 namespace Asiakas;
 
@@ -9,8 +10,8 @@ public class Asiakas
     public static void Main()
     {
         //käynnistä
-        Socket soketti = Yhdistä();
-        Kirjaudu();
+        //Socket soketti = Yhdistä();
+        //Kirjaudu();
         //jos kirjautunut
         Listaa();
         Kerää();
@@ -19,7 +20,10 @@ public class Asiakas
         Poista();
         Vaihda();
         //
-        soketti.Close();
+        //soketti.Close();
+        string x, y, z;
+        (x, y, z) = haeConfig();
+        Console.WriteLine($"{x} {y} {z}");
     }
 
     /// <summary>
@@ -52,7 +56,7 @@ public class Asiakas
     }
 
     /// <summary>
-    /// kerää thumbnailit listalle indekseistä
+    /// hakee thumbnailin indeksille
     /// </summary>
     public static void Kerää()
     {
@@ -89,6 +93,62 @@ public class Asiakas
     public static void Vaihda()
     {
 
+    }
+
+    public static (string, string, string) haeConfig()
+    {
+        string server = string.Empty;
+        string port = string.Empty;
+        string userid = string.Empty;
+
+        string dir = Directory.GetCurrentDirectory();
+        string fileName = dir + @"\config.json";
+        Console.WriteLine(fileName);
+        byte[] data = File.ReadAllBytes(fileName);
+        System.Text.Json.Utf8JsonReader reader = new System.Text.Json.Utf8JsonReader(data);
+
+        string property = string.Empty;
+        while (reader.Read())
+        {
+            switch (reader.TokenType)
+            {
+                case System.Text.Json.JsonTokenType.StartObject:
+                    break;
+                case System.Text.Json.JsonTokenType.EndObject:
+                    break;
+                case System.Text.Json.JsonTokenType.EndArray:
+                    break;
+                case System.Text.Json.JsonTokenType.StartArray:
+                    break;
+                case System.Text.Json.JsonTokenType.PropertyName:
+                    property = reader.GetString();
+                    break;
+                case System.Text.Json.JsonTokenType.String:
+                    switch (property)
+                    {
+                        case "server":
+                            server = reader.GetString();
+                            break;
+                        case "port":
+                            port = reader.GetString();
+                            break;
+                        case "userid":
+                            userid = reader.GetString();
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                default:
+                    throw new ArgumentException();
+
+            }
+        }
+
+        server = server == null ? string.Empty : server;
+        port = port == null ? string.Empty : port;
+        userid = userid == null ? string.Empty : userid;
+        return (server, port, userid);
     }
 
     /// <summary>
