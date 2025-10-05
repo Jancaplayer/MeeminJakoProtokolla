@@ -1,2 +1,3 @@
 # jätä config.json huomiotta
 config.json
+*.sln
