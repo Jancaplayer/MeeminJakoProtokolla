@@ -162,6 +162,11 @@ public class Asiakas
 
     }
 
+    /// <summary>
+    /// hakee serverin osoitteen, porttinumeron, sekä kirjautumiseen käytettävän käyttäjänimen palvelimelta
+    /// </summary>
+    /// <returns>osoite, porttinumero, käyttäjänimi</returns>
+    /// <exception cref="ArgumentException"></exception>
     public static (string, string, string) haeConfig()
     {
         string server = string.Empty;

@@ -1,0 +1,15 @@
+C:\code\MeeminJakoProtokolla\server\bin\Debug\net9.0\server.exe
+C:\code\MeeminJakoProtokolla\server\bin\Debug\net9.0\server.deps.json
+C:\code\MeeminJakoProtokolla\server\bin\Debug\net9.0\server.runtimeconfig.json
+C:\code\MeeminJakoProtokolla\server\bin\Debug\net9.0\server.dll
+C:\code\MeeminJakoProtokolla\server\bin\Debug\net9.0\server.pdb
+C:\code\MeeminJakoProtokolla\server\obj\Debug\net9.0\server.GeneratedMSBuildEditorConfig.editorconfig
+C:\code\MeeminJakoProtokolla\server\obj\Debug\net9.0\server.AssemblyInfoInputs.cache
+C:\code\MeeminJakoProtokolla\server\obj\Debug\net9.0\server.AssemblyInfo.cs
+C:\code\MeeminJakoProtokolla\server\obj\Debug\net9.0\server.csproj.CoreCompileInputs.cache
+C:\code\MeeminJakoProtokolla\server\obj\Debug\net9.0\server.sourcelink.json
+C:\code\MeeminJakoProtokolla\server\obj\Debug\net9.0\server.dll
+C:\code\MeeminJakoProtokolla\server\obj\Debug\net9.0\refint\server.dll
+C:\code\MeeminJakoProtokolla\server\obj\Debug\net9.0\server.pdb
+C:\code\MeeminJakoProtokolla\server\obj\Debug\net9.0\server.genruntimeconfig.cache
+C:\code\MeeminJakoProtokolla\server\obj\Debug\net9.0\ref\server.dll
