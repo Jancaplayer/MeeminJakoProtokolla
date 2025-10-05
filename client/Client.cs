@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
+using System.Text;
 
 namespace Asiakas;
 
 public class Asiakas
 {
-
     /// <summary>
     /// cli ympäristö protokollan testaamiselle.
     /// </summary>
     public static void Main()
     {
         //alustus
-        bool kirjautunut = false;
-        Socket soketti = null;
+        string tila = "0";
+        string msg = string.Empty;
         string server, port, userid;
-        (server, port, userid) = haeConfig();
+        Socket soketti = null;
+        (server, port, userid) = HaeConfig();
         Console.WriteLine($"{server} {port} {userid}");
 
 
@@ -25,7 +25,7 @@ public class Asiakas
         while (command.ToLower() != "quit")
         {
             if (soketti == null) { Console.WriteLine("\"yhdistä\" avataksesi yhteyden palvelimeen"); }
-            if (!kirjautunut) { Console.WriteLine("\"kirjaudu\" kirjautuaksesi palvelimeen"); }
+            if (tila == "0") { Console.WriteLine("\"kirjaudu\" kirjautuaksesi palvelimeen"); }
             Console.WriteLine("-------------------------------\n");
             Console.Write(": ");
             command = Console.ReadLine();
@@ -34,22 +34,18 @@ public class Asiakas
             {
                 case "yhdistä":
                     soketti = Yhdistä(server, int.Parse(port));
+                    //msg = Kuuntele(soketti);
                     break;
                 case "kirjaudu":
-                    string kirjautuminen = Kirjaudu(userid);
-                    kirjautunut = kirjautuminen == "success" ? true : false;
-                    if (!kirjautunut)
-                    {
-                        Console.WriteLine(kirjautuminen);
-                        throw new Exception();
-                    }
+                    string kirjautuminen = Kirjaudu(soketti, tila, "GREETINGS", userid);
+                    Console.WriteLine(kirjautuminen);
                     break;
                 default:
-                    if (kirjautunut) { komentoKytkin(command); }
+                    if (tila == "1") { komentoKytkin(command); }
                     else { Console.WriteLine("komennot eivät käytössä ennen kuin on kirjauduttu"); }
                     break;
             }
-            
+
         }
 
 
@@ -91,6 +87,14 @@ public class Asiakas
             }
     }
 
+    public static string Kuuntele(Socket s)
+    {
+        byte[] buffer = new byte[1024];
+        int r = s.Receive(buffer);
+        string msg = Encoding.UTF8.GetString(buffer, 0, r);
+        return msg;
+    }
+
     /// <summary>
     /// Yhdistää soketin
     /// </summary>
@@ -101,6 +105,7 @@ public class Asiakas
     {
         Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         s.Connect(ip, portti);
+        Console.WriteLine($"yhdistetty onnistuneesti osoitteeseen {ip}:{portti}");
         return s;
     }
 
@@ -109,9 +114,15 @@ public class Asiakas
     /// </summary>
     /// <param name="psw">salasanatunnus</param>
     /// <returns>palautteen onnistumisesta</returns>
-    public static string Kirjaudu(string psw)
+    public static string Kirjaudu(Socket s, string tila, string srv, string psw)
     {
-        return null;
+        if (s == null) { return "Yhdistä ensin palvelimeen"; }
+        string vastaus;
+        (tila, vastaus) = Tila(tila, srv, psw);
+        s.Send(Encoding.UTF8.GetBytes(vastaus));
+        Console.WriteLine("sent\n" + vastaus);
+        string reply = Kuuntele(s);
+        return reply;
     }
 
     /// <summary>
@@ -167,7 +178,7 @@ public class Asiakas
     /// </summary>
     /// <returns>osoite, porttinumero, käyttäjänimi</returns>
     /// <exception cref="ArgumentException"></exception>
-    public static (string, string, string) haeConfig()
+    public static (string, string, string) HaeConfig()
     {
         string server = string.Empty;
         string port = string.Empty;
@@ -229,7 +240,7 @@ public class Asiakas
     /// <param name="tila">tunnettu tila</param>
     /// <param name="servViesti">palvelimen lähettämä viesti</param>
     /// <returns>uuden tilan ja palvelimelle lähetettävän viestin muodon</returns>
-    public static (string, string) Tila(string tila, string servViesti)
+    public static (string, string) Tila(string tila, string servViesti, string agenda)
     {
         string vastaus = string.Empty;
         bool error = false;
@@ -240,7 +251,7 @@ public class Asiakas
                 switch (servOsat[0])
                 {
                     case "GREETINGS":
-                        vastaus = "user123#"; //userpassword
+                        vastaus = "Login|"+agenda; //userpassword
                         break;
                     case "WHITELIST":
                         tila = servOsat[1] == "OK" ? "1" : "0";

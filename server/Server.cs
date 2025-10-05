@@ -6,7 +6,7 @@ namespace Palvelin;
 
 public class Palvelin
 {
-    public async static void Main()
+    public async static Task Main()
     {
         bool on = true;
         // alustus
@@ -20,17 +20,19 @@ public class Palvelin
         soketti.Listen(asetukset.Rinnakkaiset + 1);
 
         //huonosti skaalautuva, jos isommalle porukalle haluaa palvella
-        Socket[] asiakkaat = new Socket[asetukset.Rinnakkaiset];
+        Socket[] asiakkaat = new Socket[asetukset.Rinnakkaiset + 1];
         while (on)
         {
             int vapaaIndex = -1;
             int vapaita = 0;
             for (int i = 0; i < asiakkaat.Length; i++)
             {
+                Console.WriteLine(asiakkaat[i]);
                 if (asiakkaat[i] == null || !asiakkaat[i].Connected) { vapaaIndex = i; vapaita++; }
             }
             if (vapaaIndex == -1)
             {
+                vapaita = 0;
                 while (vapaita == 0)
                 {
                     //odota sokettien vapautumista
@@ -44,9 +46,13 @@ public class Palvelin
             else
             {
                 //odotetaan uusi asiakas palveltavaksi
+                Console.WriteLine($"accepting..");
                 asiakkaat[vapaaIndex] = soketti.Accept();
+                vapaita--;
+                Console.WriteLine($"asiakas yhdisti, vapaita paikkoja {vapaita}");
                 //aloitetaan asiakkaan palvelu
-                palvellaan(asiakkaat, vapaaIndex);
+                if (vapaita > 1) { palvellaan(asiakkaat, vapaaIndex); }
+                else { ilmoitaLiiastaAsiakasMäärästä(asiakkaat, vapaaIndex); }
             }
         }
     }
@@ -58,13 +64,21 @@ public class Palvelin
     /// <param name="vapaaIndex">vapaan soketin indeksi</param>
     public static async void palvellaan(Socket[] soketit, int vapaaIndex)
     {
-        bool palvellaan = true;
         Socket asiakas = soketit[vapaaIndex];
+        await asiakas.SendAsync(Encoding.UTF8.GetBytes("GREETINGS"));
+
+        bool palvellaan = true;
         string msg = string.Empty;
         while (palvellaan)
         {
             //asiakkaan palvelu
-            
+            //jotakin tähän tyyliin
+            byte[] buffer = new byte[1024];
+            int r = await asiakas.ReceiveAsync(buffer);
+            msg = Encoding.UTF8.GetString(buffer, 0, r);
+            Console.WriteLine($"vastaanotettiin:\n------------------------------------\n{msg}\n------------------------------------");
+            string snd = "QUIT|Kaikki asiakaspaikat jo käytössä";
+            await asiakas.SendAsync(Encoding.UTF8.GetBytes(snd));
         }
         await asiakas.DisconnectAsync(true);
     }
